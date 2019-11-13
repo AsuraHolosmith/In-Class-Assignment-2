@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System.IO;
+using System.Linq;
 
 
 public class GameController : MonoBehaviour
@@ -29,7 +30,6 @@ public class GameController : MonoBehaviour
     public Text scoreLabel;
     public Text highScoreLabel;
 
-    public ScoreBoard scoreBoard;
 
     //public HighScoreSO highScoreSO;
 
@@ -38,6 +38,11 @@ public class GameController : MonoBehaviour
     public GameObject startButton;
     public GameObject endLabel;
     public GameObject restartButton;
+
+    public ScoreBoard scoreBoard;
+
+    public List<SceneSettings> sceneSettings;
+    private SceneSettings activeSceneSettings;
 
     // public properties
     public int Lives
@@ -50,6 +55,8 @@ public class GameController : MonoBehaviour
         set
         {
             _lives = value;
+            scoreBoard.lives = _lives;
+
             if(_lives < 1)
             {
                 
@@ -73,6 +80,7 @@ public class GameController : MonoBehaviour
         set
         {
             _score = value;
+            scoreBoard.score = _score;
 
             
             if (scoreBoard.highScore < _score)
@@ -101,37 +109,38 @@ public class GameController : MonoBehaviour
 
     private void SceneConfiguration()
     {
-        switch (SceneManager.GetActiveScene().name)
+        // converts the scene name to an enum
+        var sceneToCompare = (Scene) System.Enum.Parse(typeof(Scene),
+            SceneManager.GetActiveScene().name.ToUpper());
+
+        // uses LINQ to return a setting that matches the current scene name
+        var query = from setting in sceneSettings
+                    where setting.scene == sceneToCompare
+                    select setting;
+
+        // returns the first item that matches the criteria from the list
+        activeSceneSettings = query.ToList().First();
+
         {
-            case "Start":
-                scoreLabel.enabled = false;
-                livesLabel.enabled = false;
-                highScoreLabel.enabled = false;
-                endLabel.SetActive(false);
-                restartButton.SetActive(false);
-                activeSoundClip = SoundClip.NONE;
-                break;
-            case "Main":
-                highScoreLabel.enabled = false;
-                startLabel.SetActive(false);
-                startButton.SetActive(false);
-                endLabel.SetActive(false);
-                restartButton.SetActive(false);
-                activeSoundClip = SoundClip.ENGINE;
-                break;
-            case "End":
-                scoreLabel.enabled = false;
-                livesLabel.enabled = false;
-                startLabel.SetActive(false);
-                startButton.SetActive(false);
-                activeSoundClip = SoundClip.NONE;
-                highScoreLabel.text = "High Score: " + scoreBoard.highScore;
-                break;
+            if (activeSceneSettings.scene == Scene.MAIN)
+            {
+                Lives = 5;
+                Score = 0;
+            }
+
+            activeSoundClip = activeSceneSettings.activeSoundClip;
+            scoreLabel.enabled = activeSceneSettings.scoreLabelEnabled;
+            livesLabel.enabled = activeSceneSettings.livesLabelEnabled;
+            highScoreLabel.enabled = activeSceneSettings.highScoreLabelEnabled;
+            startLabel.SetActive(activeSceneSettings.startLabelSetActive);
+            endLabel.SetActive(activeSceneSettings.endLabelSetActive);
+            startButton.SetActive(activeSceneSettings.startButtonActive);
+            restartButton.SetActive(activeSceneSettings.restartButtonActive);
+
+            scoreLabel.text = "Score: " + scoreBoard.score;
+            livesLabel.text = "Lives: " + scoreBoard.lives;
+            highScoreLabel.text = "High Score: " + scoreBoard.highScore;
         }
-
-        Lives = 5;
-        Score = 0;
-
 
         if ((activeSoundClip != SoundClip.NONE) && (activeSoundClip != SoundClip.NUM_OF_CLIPS))
         {
@@ -164,7 +173,7 @@ public class GameController : MonoBehaviour
     // Event Handlers
     public void OnStartButtonClick()
     {
-        DontDestroyOnLoad(scoreBoard);
+        
         SceneManager.LoadScene("Main");
     }
 
