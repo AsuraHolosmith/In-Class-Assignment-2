@@ -13,7 +13,7 @@ public class BulletPoolManager : MonoBehaviour
 
     //array of bullets
     Stack<GameObject> BulletClip;
-    Vector3 PoolLoc = new Vector3(-1000.0f, -1000.0f);
+    //Vector3 PoolLoc = new Vector3(-1000.0f, -1000.0f);
 
     // Start is called before the first frame update
     void Start()
@@ -22,16 +22,10 @@ public class BulletPoolManager : MonoBehaviour
         // TODO: add a series of bullets to the Bullet Pool
         for (int i = 0; i < 25; i++)
         {
-            GameObject newBullet = Instantiate(bullet, PoolLoc, Quaternion.identity);
+            var newBullet = Instantiate(bullet/*, PoolLoc, Quaternion.identity*/);
             newBullet.SetActive(false);
             BulletClip.Push(newBullet);
         }
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     //TODO: modify this function to return a bullet from the Pool
@@ -44,7 +38,7 @@ public class BulletPoolManager : MonoBehaviour
     public void ResetBullet(GameObject bullet)
     {
         BulletClip.Push(bullet);
-        bullet.transform.position = PoolLoc;
+        //bullet.transform.position = PoolLoc;
         bullet.SetActive(false);
     }
 }

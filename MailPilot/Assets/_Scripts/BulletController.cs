@@ -14,8 +14,9 @@ public class BulletController : MonoBehaviour
 
     void Start()
     {
-        bulletPoolManager = GameObject.Find("BulletPoolManager").GetComponent<BulletPoolManager>();
         boundary.Top = 2.45f;
+
+        bulletPoolManager = GameObject.FindWithTag("Manager").GetComponent<BulletPoolManager>();
     }
 
 
